@@ -359,6 +359,7 @@ h2{
   var oui = document.getElementById('oui');
   var taquine = document.getElementById('taquine');
   var fuites = 0;
+  var derniereFuite = 0;
   var phrases = [
     'attends, réfléchis bien 👀',
     'hmm… t\'es sûre de toi ?',
@@ -392,18 +393,38 @@ h2{
     non.style.top  = y + 'px';
 
     fuites++;
+    derniereFuite = Date.now();
     taquine.textContent = phrases[Math.min(fuites - 1, phrases.length - 1)];
     oui.style.transform = 'scale(' + (1 + fuites * 0.13) + ')';   // sans limite
     if(fuites >= 6) non.style.opacity = Math.max(.35, 1 - (fuites - 5) * 0.16);
   }
 
-  non.addEventListener('pointerenter', echappe);
-  non.addEventListener('pointerdown', function(e){ e.preventDefault(); echappe(); });
-  non.addEventListener('click', function(e){ e.preventDefault(); echappe(); });
+  // À la souris, il fuit dès qu'on l'approche.
+  non.addEventListener('pointerenter', function(e){
+    if(e.pointerType === 'touch') return;
+    echappe();
+  });
+  non.addEventListener('pointerdown', function(e){
+    // Au doigt, surtout ne pas bouger dès l'appui : le bouton partirait
+    // avant qu'on relève le doigt, et le navigateur enverrait alors le clic
+    // à ce qui se trouve dessous — le « Oui ». On attend donc le clic.
+    if(e.pointerType === 'touch') return;
+    e.preventDefault();
+    echappe();
+  });
+  non.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    echappe();
+  });
   window.addEventListener('resize', function(){ if(non.classList.contains('libre')) echappe(); });
 
   /* ── Le « Oui » ────────────────────────────────────────────────── */
   oui.addEventListener('click', function(){
+    // Deuxième garde-fou : un clic qui arrive dans la foulée d'une fuite
+    // n'est pas pour nous, c'est le tap du « Non » qui a été redirigé ici.
+    if(Date.now() - derniereFuite < 300) return;
+
     document.getElementById('question').hidden = true;
     non.hidden = true;
     document.getElementById('final').classList.add('visible');
