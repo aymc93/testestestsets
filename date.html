@@ -65,6 +65,25 @@ button,a{touch-action:manipulation}
   100%{transform:translateY(-118vh) rotate(var(--tour,25deg));opacity:0}
 }
 #confettis{position:fixed;inset:0;pointer-events:none;z-index:40}
+/* la cascade façon Solitaire : cette toile n'est jamais effacée */
+#cascade{position:fixed;inset:0;pointer-events:none;z-index:45}
+
+/* ── Le bouton cœur ────────────────────────────────────────────────────── */
+.coeur-btn{
+  width:62px;height:62px;border-radius:50%;border:0;padding:0;cursor:pointer;
+  margin:30px auto 0;display:grid;place-items:center;
+  background:linear-gradient(150deg,var(--rose-clair),var(--rose));
+  box-shadow:0 10px 30px rgba(241,2,145,.6);
+  animation:battement 2.2s ease-in-out infinite;
+  transition:transform .2s cubic-bezier(.34,1.4,.5,1), box-shadow .2s ease;
+}
+.coeur-btn:active{transform:scale(.9)}
+.coeur-btn:focus-visible{outline:3px solid var(--snow);outline-offset:5px}
+@keyframes battement{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (hover:hover){
+  .coeur-btn:hover{box-shadow:0 14px 40px rgba(241,2,145,.85)}
+}
+.coeur-aide{margin:12px 0 0;font-size:.78rem;color:var(--texte-doux);opacity:.6}
 
 .page{
   position:relative;z-index:1;
@@ -229,6 +248,7 @@ h2{
 <body>
 <div id="flotte" aria-hidden="true"></div>
 <canvas id="confettis" aria-hidden="true"></canvas>
+<canvas id="cascade" aria-hidden="true"></canvas>
 
 <main class="page">
 
@@ -296,6 +316,12 @@ h2{
       <!-- ✏️ Le petit mot sur la distance -->
       <p class="ps">et je sais que t'habites pas juste à côté… mais si c'est plus simple pour toi, je peux très bien faire le trajet et venir te voir 🚆</p>
       <p class="signature-fin">fait à la main, pour toi ♡</p>
+
+      <!-- 💗 le bouton de la fin : la cascade de cœurs -->
+      <button class="coeur-btn" id="coeurBtn" type="button" aria-label="Lancer une pluie de cœurs">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="#FFF3F2" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
+      <p class="coeur-aide" id="coeurAide">appuie 💗</p>
     </div>
   </div>
 
@@ -367,7 +393,7 @@ h2{
 
     fuites++;
     taquine.textContent = phrases[Math.min(fuites - 1, phrases.length - 1)];
-    oui.style.transform = 'scale(' + Math.min(1 + fuites * 0.13, 2.1) + ')';
+    oui.style.transform = 'scale(' + (1 + fuites * 0.13) + ')';   // sans limite
     if(fuites >= 6) non.style.opacity = Math.max(.35, 1 - (fuites - 5) * 0.16);
   }
 
@@ -446,6 +472,121 @@ h2{
     }
     requestAnimationFrame(boucle);
   }
+
+  /* ── Le bouton cœur : la cascade façon Solitaire ───────────────────
+     Le principe du Solitaire : on n'efface JAMAIS la toile. Chaque cœur
+     repeint sa position à chaque image, donc il laisse une traînée
+     continue en rebondissant sur le bas de l'écran. */
+  (function cascadeCoeurs(){
+    var btn  = document.getElementById('coeurBtn');
+    var aide = document.getElementById('coeurAide');
+    var cv   = document.getElementById('cascade');
+    var ctx  = cv.getContext('2d');
+    var dpr  = Math.min(window.devicePixelRatio || 1, 2);
+    var EMOJIS = ['💗','💖','💕','❤️','💘','💓','💝'];
+    var POLICE = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+    var W = 0, H = 0, vivants = [], image = null, tic = 0, actif = false;
+
+    // Redimensionner une toile l'efface. Sur téléphone, la barre d'adresse
+    // qui se rétracte déclenche un resize : on recopie donc la traînée
+    // avant de retailler, sinon tout disparaîtrait au moindre scroll.
+    function taille(){
+      var L = window.innerWidth, Ht = window.innerHeight;
+      if(L === W && Ht === H) return;
+
+      var avant = null;
+      if(cv.width > 0 && cv.height > 0){
+        avant = document.createElement('canvas');
+        avant.width = cv.width; avant.height = cv.height;
+        avant.getContext('2d').drawImage(cv, 0, 0);
+      }
+
+      W = L; H = Ht;
+      cv.width = W * dpr; cv.height = H * dpr;
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if(avant) ctx.drawImage(avant, 0, 0, avant.width / dpr, avant.height / dpr);
+    }
+    taille();
+    window.addEventListener('resize', taille);
+
+    // de vrais emojis : beaucoup plus lisibles que des cœurs dessinés
+    function coeur(x, y, t, e, a){
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(a);
+      ctx.font = t + 'px ' + POLICE;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(e, 0, 0);
+      ctx.restore();
+    }
+
+    // les cœurs tombent du ciel, n'importe où en haut de l'écran
+    function naissance(){
+      vivants.push({
+        x: Math.random() * W,
+        y: -40,
+        vx: (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 3),
+        vy: 2 + Math.random() * 3,
+        t: 24 + Math.random() * 20,
+        a: (Math.random() - 0.5) * 0.5,
+        va: (Math.random() - 0.5) * 0.06,
+        e: EMOJIS[Math.floor(Math.random() * EMOJIS.length)]
+      });
+    }
+
+    function boucle(){
+      tic++;
+      if(actif && tic % 6 === 0 && vivants.length < 18) naissance();
+
+      for(var i = vivants.length - 1; i >= 0; i--){
+        var p = vivants[i];
+        coeur(p.x, p.y, p.t, p.e, p.a);   // ← aucun clearRect : c'est la traînée
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.3;                       // gravité
+        p.a  += p.va;
+        if(p.y > H - p.t / 2){             // rebond sur le bas de l'écran
+          p.y = H - p.t / 2;
+          p.vy = -p.vy * 0.72;
+          p.vx *= 0.995;
+        }
+        if(p.x < -80 || p.x > W + 80) vivants.splice(i, 1);
+      }
+      image = requestAnimationFrame(boucle);
+    }
+
+    function demarre(){
+      actif = true;
+      aide.textContent = 'rappuie pour effacer ✨';
+      if(image === null) boucle();
+    }
+
+    function arrete(){
+      actif = false;
+      vivants = [];
+      if(image !== null){ cancelAnimationFrame(image); image = null; }
+      ctx.clearRect(0, 0, W, H);
+      aide.textContent = 'appuie 💗';
+    }
+
+    btn.addEventListener('click', function(){
+      if(doux){                            // animation réduite : une seule gerbe fixe
+        ctx.clearRect(0, 0, W, H);
+        for(var i = 0; i < 70; i++){
+          coeur(Math.random() * W, Math.random() * H,
+                24 + Math.random() * 20,
+                EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+                (Math.random() - 0.5) * 0.5);
+        }
+        return;
+      }
+      if(actif) arrete(); else demarre();
+    });
+  })();
 
   /* ── Le calendrier ─────────────────────────────────────────────── */
   (function calendrier(){
