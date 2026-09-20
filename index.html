@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Un mot pour toi</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -5,10 +10,18 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap">
 
 <style>
-/* ── Palette ───────────────────────────────────────────────────────────────
-   Snow FFF3F2 · Pastel Petal FFCAE4 · Electric Rose F10291
-   Dark Raspberry 89235B · Rich Mahogany 250209
-   Thème unique assumé : fond magenta profond avec une lueur rose.
+/* Socle de base (identique sur les 3 pages) */
+:root{
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+img{max-width:100%}
+[hidden]{display:none!important}
+
+/* ── PARTIE 1 / 3 ──────────────────────────────────────────────────────────
+   Palette : Snow FFF3F2 · Pastel Petal FFCAE4 · Electric Rose F10291
+             Dark Raspberry 89235B · Rich Mahogany 250209
    ─────────────────────────────────────────────────────────────────────── */
 :root{
   --snow:#FFF3F2;
@@ -17,31 +30,33 @@
   --rose-clair:#FF4FB0;
   --framboise:#89235B;
   --acajou:#250209;
-
-  --texte:var(--snow);
   --texte-doux:#F3B9D6;
-  --carte:var(--snow);
-  --texte-carte:var(--acajou);
-  --mauve-eteint:#D7A3C0;
-
-  --ombre:rgba(37,2,9,.38);
-  --ombre-forte:rgba(37,2,9,.55);
   --lueur:rgba(241,2,145,.55);
 }
 
 *{box-sizing:border-box}
-html,body{margin:0}
+html,body{margin:0;height:100%}
 body{
   font-family:'Quicksand','Trebuchet MS',sans-serif;
-  color:var(--texte);
+  color:var(--snow);
+  background:var(--acajou);
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
+
+/* Le degrade est une couche fixe a part : sur iPhone,
+   background-attachment:fixed n est pas fiable. */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
   background:
     radial-gradient(900px 720px at 80% 20%, rgba(241,2,145,.60) 0%, transparent 62%),
     radial-gradient(760px 620px at 10% 76%, rgba(255,202,228,.20) 0%, transparent 60%),
     linear-gradient(165deg, #250209 0%, #4E0E2F 30%, #89235B 62%, #C00A73 100%);
-  background-attachment:fixed;
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
 }
+
+/* pas de delai de 300 ms au tap */
+button,a{touch-action:manipulation}
 
 /* ── Cœurs qui flottent en fond ────────────────────────────────────────── */
 #flotte{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -53,598 +68,120 @@ body{
   100%{transform:translateY(-118vh) rotate(var(--tour,25deg));opacity:0}
 }
 
-/* ── Structure ─────────────────────────────────────────────────────────── */
-.page{position:relative;z-index:1;padding-inline:20px}
-section{
-  max-width:640px;margin-inline:auto;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;
-  padding-block:64px;
-}
-
-/* ── Titres ────────────────────────────────────────────────────────────── */
-h1,h2{font-family:'Fredoka','Trebuchet MS',sans-serif;font-weight:600;text-wrap:balance;margin:0;color:var(--snow)}
-h1{font-size:clamp(2.4rem,9vw,3.6rem);line-height:1.1;letter-spacing:-.01em;text-shadow:0 0 44px var(--lueur)}
-h2{font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.2;text-shadow:0 0 34px rgba(241,2,145,.4)}
-.sous{font-size:clamp(1rem,3.6vw,1.15rem);color:var(--texte-doux);max-width:30ch;line-height:1.6;margin:14px auto 0}
-
-/* ── Accueil ───────────────────────────────────────────────────────────── */
-#accueil{position:relative}
-.nuages{position:absolute;inset:0;pointer-events:none;z-index:-1}
+/* ── Nuages ────────────────────────────────────────────────────────────── */
+.nuages{position:fixed;inset:0;pointer-events:none;z-index:0}
 .nuage{position:absolute;opacity:.16;animation:derive 26s ease-in-out infinite alternate}
-.nuage:nth-child(1){top:6%;left:-4%;width:120px}
-.nuage:nth-child(2){top:20%;right:-2%;width:90px;animation-duration:34s;animation-direction:alternate-reverse}
-.nuage:nth-child(3){top:62%;left:4%;width:70px;animation-duration:30s}
+.nuage:nth-child(1){top:8%;left:-4%;width:120px}
+.nuage:nth-child(2){top:22%;right:-2%;width:90px;animation-duration:34s;animation-direction:alternate-reverse}
+.nuage:nth-child(3){top:70%;left:4%;width:70px;animation-duration:30s}
 @keyframes derive{from{transform:translateX(0)}to{transform:translateX(26px)}}
 
-@keyframes rebond{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+/* ── Mise en page : un seul écran ──────────────────────────────────────── */
+.page{
+  position:relative;z-index:1;
+  min-height:100%;max-width:640px;margin-inline:auto;
+  padding-inline:20px;padding-block:48px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  animation:entree .6s ease;
+}
+@keyframes entree{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 
-/* ── Les petits chats (vignettes blanches sur fond sombre) ─────────────── */
+h1{
+  font-family:'Fredoka','Trebuchet MS',sans-serif;font-weight:600;
+  font-size:clamp(2.4rem,9vw,3.6rem);line-height:1.1;letter-spacing:-.01em;
+  text-wrap:balance;margin:0;color:var(--snow);text-shadow:0 0 44px var(--lueur);
+}
+.sous{
+  font-size:clamp(1rem,3.6vw,1.15rem);color:var(--texte-doux);
+  max-width:30ch;line-height:1.6;margin:14px auto 0;
+}
+.eyebrow{
+  font-family:'Fredoka',sans-serif;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--petale);background:rgba(255,202,228,.12);border:1px solid rgba(255,202,228,.35);
+  border-radius:999px;padding:8px 18px;margin-bottom:24px;
+}
+
+/* ── Le chat ───────────────────────────────────────────────────────────── */
 .sticker{
   background:#fff;border-radius:28px;padding:10px;
   display:grid;place-items:center;overflow:hidden;
   box-shadow:0 18px 44px rgba(37,2,9,.5), 0 0 0 4px rgba(255,202,228,.22);
 }
 .sticker img{display:block;width:100%;height:100%;object-fit:contain;border-radius:20px}
-.sticker-xl{width:min(240px,62vw);aspect-ratio:1;animation:rebond 3.4s ease-in-out infinite}
-.sticker-md{width:min(190px,50vw);aspect-ratio:1;margin-bottom:16px;animation:penche 4s ease-in-out infinite}
-.sticker-sm{width:min(160px,42vw);aspect-ratio:1;margin:22px auto 0;animation:pop .55s cubic-bezier(.34,1.5,.5,1)}
-@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.sticker-xl{width:min(240px,60vw);aspect-ratio:1;animation:rebond 3.4s ease-in-out infinite}
+@keyframes rebond{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 
-.eyebrow{
-  font-family:'Fredoka',sans-serif;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;
-  color:var(--petale);background:rgba(255,202,228,.12);border:1px solid rgba(255,202,228,.35);
-  border-radius:999px;padding:8px 18px;margin-bottom:22px;
+/* ── Bouton « Continuer » ──────────────────────────────────────────────── */
+.suite{
+  display:inline-block;text-decoration:none;margin-top:38px;
+  font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:600;color:var(--snow);
+  background:linear-gradient(150deg,var(--rose-clair),var(--rose));
+  border-radius:999px;padding:15px 40px;
+  box-shadow:0 10px 32px rgba(241,2,145,.5);
+  transition:transform .25s cubic-bezier(.34,1.4,.5,1), box-shadow .25s ease;
 }
-.fleche{margin-top:44px;color:var(--texte-doux);font-size:.9rem;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.85}
-.fleche span:last-child{animation:descend 1.8s ease-in-out infinite;font-size:1.3rem;line-height:1}
-@keyframes descend{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+.suite:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 16px 44px rgba(241,2,145,.75)}
+.suite:focus-visible{outline:3px solid var(--snow);outline-offset:4px}
 
-/* ── Enveloppe ─────────────────────────────────────────────────────────── */
-.env-zone{perspective:900px;margin-top:8px;--w:min(290px,80vw)}
-.env{
-  position:relative;width:var(--w);aspect-ratio:29/19;
-  border:0;padding:0;background:none;cursor:pointer;display:block;
-  transition:transform .35s ease, opacity .5s ease;
-}
-.env:hover{transform:translateY(-6px) scale(1.02)}
-.env:focus-visible{outline:3px solid var(--petale);outline-offset:10px;border-radius:16px}
-.env-dos{position:absolute;inset:0;background:var(--framboise);border-radius:14px;box-shadow:0 20px 44px var(--ombre-forte)}
-.env-papier{
-  position:absolute;left:8%;right:8%;top:14%;height:78%;
-  background:var(--snow);border-radius:8px;z-index:2;
-  box-shadow:0 2px 14px rgba(37,2,9,.3);
-  transition:transform .7s cubic-bezier(.34,1.3,.5,1) .45s;
-}
-.env-avant{
-  position:absolute;inset:0;background:linear-gradient(160deg,var(--rose-clair),var(--rose));border-radius:14px;z-index:3;
-  clip-path:polygon(0 100%,0 26%,50% 74%,100% 26%,100% 100%);
-}
-.env-rabat{
-  position:absolute;top:0;left:0;width:100%;height:0;z-index:4;
-  border-left:calc(var(--w)/2) solid transparent;
-  border-right:calc(var(--w)/2) solid transparent;
-  border-top:calc(var(--w)*.36) solid #D7128A;
-  transform-origin:top;transform:rotateX(0deg);
-  transition:transform .6s ease, z-index 0s .35s;
-}
-.env-sceau{
-  position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);z-index:5;
-  width:44px;height:44px;border-radius:50%;background:var(--snow);
-  display:grid;place-items:center;box-shadow:0 4px 16px rgba(37,2,9,.45);
-  transition:opacity .3s ease, transform .3s ease;
-}
-.env.ouverte .env-rabat{transform:rotateX(180deg);z-index:1}
-.env.ouverte .env-papier{transform:translateY(-62%) scale(1.04)}
-.env.ouverte .env-sceau{opacity:0;transform:translate(-50%,-50%) scale(.4)}
-.env.partie{opacity:0;transform:scale(.9);pointer-events:none}
-.tap{margin-top:26px;font-size:.92rem;color:var(--texte-doux);font-weight:600}
-
-/* ── La lettre ─────────────────────────────────────────────────────────── */
-.lettre{
-  width:100%;max-width:520px;background:var(--carte);
-  border-radius:22px;padding:42px 30px 34px;
-  box-shadow:0 26px 60px var(--ombre-forte);
-  position:relative;text-align:left;overflow:hidden;
-}
-.lettre::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:10px;
-  background:repeating-linear-gradient(90deg,var(--rose) 0 16px,var(--petale) 16px 32px);
-}
-.lettre p{
-  font-family:'Caveat','Segoe Script',cursive;
-  font-size:clamp(1.35rem,4.6vw,1.65rem);
-  line-height:1.55;color:var(--texte-carte);margin:0 0 16px;
-  opacity:0;transform:translateY(10px);animation:apparait .7s ease forwards;
-}
-.lettre .signe{text-align:right;color:var(--rose);font-weight:700;margin-top:26px;margin-bottom:0}
-@keyframes apparait{to{opacity:1;transform:none}}
-
-/* ── Polaroid ──────────────────────────────────────────────────────────── */
-.polaroid{
-  background:#fff;padding:12px 12px 46px;border-radius:6px;
-  box-shadow:0 16px 34px rgba(37,2,9,.3);transform:rotate(-4deg);
-  width:min(220px,62vw);margin:34px auto 0;position:relative;
-  opacity:0;animation:apparait .7s ease forwards;
-}
-.polaroid .cadre{
-  aspect-ratio:1;max-width:100%;background:#fff;
-  border-radius:3px;display:grid;place-items:center;overflow:hidden;
-}
-.polaroid .cadre img{width:100%;height:100%;object-fit:contain;display:block}
-.polaroid figcaption{
-  font-family:'Caveat',cursive;font-size:1.3rem;color:var(--framboise);
-  position:absolute;left:0;right:0;bottom:10px;text-align:center;margin:0;
-}
-
-/* ── La question ───────────────────────────────────────────────────────── */
-.chat{width:min(180px,46vw);margin-bottom:10px;animation:penche 4s ease-in-out infinite;filter:drop-shadow(0 14px 34px rgba(37,2,9,.45))}
-@keyframes penche{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-.boutons{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:34px;min-height:70px}
-.btn{
-  font-family:'Fredoka',sans-serif;font-size:1.25rem;font-weight:600;
-  border:0;border-radius:999px;padding:16px 40px;cursor:pointer;color:var(--snow);
-  transition:transform .28s cubic-bezier(.34,1.4,.5,1), box-shadow .28s ease, opacity .3s ease;
-}
-.btn:focus-visible{outline:3px solid var(--snow);outline-offset:4px}
-.oui{background:linear-gradient(150deg,var(--rose-clair),var(--rose));box-shadow:0 10px 32px rgba(241,2,145,.55)}
-.oui:hover{box-shadow:0 14px 40px rgba(241,2,145,.75)}
-.non{background:linear-gradient(150deg,#A32C6C,var(--framboise));box-shadow:0 8px 22px var(--ombre)}
-.non.libre{position:fixed;z-index:30;margin:0;transition:left .22s ease, top .22s ease, opacity .3s ease}
-.taquine{font-size:1rem;color:var(--texte-doux);min-height:1.6em;margin-top:18px;font-weight:600}
-
-/* ── Écran final ───────────────────────────────────────────────────────── */
-#final{display:none}
-#final.visible{display:flex}
-#confettis{position:fixed;inset:0;pointer-events:none;z-index:40}
-.gros{
-  font-family:'Fredoka',sans-serif;font-size:clamp(2.6rem,11vw,4.2rem);
-  color:var(--snow);line-height:1.05;margin:0;
-  text-shadow:0 0 50px rgba(241,2,145,.85);
-}
-
-/* ── Le calendrier ─────────────────────────────────────────────────────── */
-.agenda{width:100%;max-width:400px;margin-top:40px}
-.agenda h3{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.2rem;margin:0 0 16px;color:var(--snow)}
-.cal{
-  background:var(--carte);border-radius:20px;padding:18px 16px;
-  box-shadow:0 20px 50px var(--ombre-forte);
-}
-.cal-tete{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
-.cal-tete span{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.05rem;text-transform:capitalize;color:var(--texte-carte)}
-.cal-nav{
-  border:0;background:var(--petale);color:var(--framboise);
-  width:34px;height:34px;border-radius:50%;flex:none;
-  font-family:'Fredoka',sans-serif;font-size:1.15rem;line-height:1;cursor:pointer;
-  transition:background .2s ease, color .2s ease;
-}
-.cal-nav:hover:not(:disabled){background:var(--rose);color:var(--snow)}
-.cal-nav:disabled{opacity:.28;cursor:default}
-.cal-jours,.cal-grille{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cal-jours{margin-bottom:8px}
-.cal-jours span{font-size:.68rem;font-weight:700;color:#A8547E;text-align:center;letter-spacing:.06em}
-.jour{
-  aspect-ratio:1;max-width:100%;border:0;border-radius:12px;padding:0;
-  background:var(--petale);color:var(--acajou);
-  font-family:'Quicksand',sans-serif;font-weight:700;font-size:.9rem;
-  cursor:pointer;display:grid;place-items:center;
-  transition:transform .18s cubic-bezier(.34,1.4,.5,1), background .18s ease, color .18s ease;
-}
-.jour.weekend:not(:disabled){background:#FFE3F0}
-.jour.aujourdhui{box-shadow:inset 0 0 0 2px var(--rose)}
-.jour:hover:not(:disabled){transform:scale(1.14);background:var(--rose-clair);color:var(--snow)}
-.jour:focus-visible{outline:3px solid var(--framboise);outline-offset:2px}
-.jour:disabled{background:transparent;color:var(--mauve-eteint);cursor:default;box-shadow:none}
-.jour.vide{background:transparent;cursor:default;pointer-events:none}
-.jour.choisi,.jour.choisi:hover{
-  background:var(--rose);color:var(--snow);transform:scale(1.1);
-  box-shadow:0 6px 18px rgba(241,2,145,.6);
-}
-.cal-reponse{
-  font-family:'Caveat','Segoe Script',cursive;font-size:clamp(1.35rem,4.5vw,1.6rem);
-  color:var(--petale);min-height:1.6em;margin:22px 0 0;line-height:1.4;
-}
-.btn-doux{
-  margin-top:14px;border:2px dashed rgba(255,202,228,.5);background:transparent;
-  color:var(--texte-doux);font-family:'Quicksand',sans-serif;font-weight:700;font-size:.95rem;
-  border-radius:999px;padding:11px 24px;cursor:pointer;
-  transition:background .2s ease, color .2s ease, border-color .2s ease;
-}
-.btn-doux:hover{background:rgba(255,202,228,.14);color:var(--snow);border-color:var(--petale)}
-.btn-doux:focus-visible{outline:3px solid var(--snow);outline-offset:3px}
-.ps{
-  margin:30px auto 0;font-size:.85rem;color:var(--texte-doux);
-  line-height:1.65;max-width:34ch;font-style:italic;opacity:.9;
-}
-
-footer{position:relative;z-index:1;text-align:center;padding:30px 20px 46px;color:var(--texte-doux);font-size:.85rem;opacity:.7}
+/* ── Où on en est (1/3) ────────────────────────────────────────────────── */
+.points{display:flex;gap:9px;margin-top:34px}
+.points i{width:7px;height:7px;border-radius:50%;background:rgba(255,202,228,.3)}
+.points i.on{background:var(--petale);box-shadow:0 0 12px var(--petale)}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.12s!important}
-  .lettre p,.polaroid{opacity:1;transform:none}
-  .polaroid{transform:rotate(-4deg)}
 }
 </style>
+</head>
 
+<body>
 <div id="flotte" aria-hidden="true"></div>
-<canvas id="confettis" aria-hidden="true"></canvas>
-
-<div class="page">
-
-  <!-- ══ 1. ACCUEIL ══════════════════════════════════════════════════ -->
-  <section id="accueil">
-    <div class="nuages" aria-hidden="true">
-      <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
-      <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
-      <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
-    </div>
-
-    <span class="eyebrow">rien que pour toi</span>
-
-    <!-- 🐱 chat n°1 : il serre un gros cœur -->
-    <div class="sticker sticker-xl">
-      <img src="cat.jpg" alt="Un petit chat qui serre un gros cœur rose contre lui">
-    </div>
-
-    <!-- ✏️ REMPLACE « toi » par son prénom -->
-    <h1>Hey toi&nbsp;💗</h1>
-    <p class="sous">J'ai fait ce petit coin d'internet rien que pour toi. Prends ton temps, y'a rien qui presse.</p>
-
-    <div class="fleche" aria-hidden="true"><span>descends doucement</span><span>↓</span></div>
-  </section>
-
-  <!-- ══ 2. LA LETTRE ════════════════════════════════════════════════ -->
-  <section id="mot">
-    <h2>J'ai un truc à te dire</h2>
-    <p class="sous" id="consigne">Ouvre l'enveloppe&nbsp;👇</p>
-
-    <div class="env-zone" id="envZone">
-      <button class="env" id="env" aria-label="Ouvrir l'enveloppe" aria-expanded="false">
-        <span class="env-dos"></span>
-        <span class="env-papier"></span>
-        <span class="env-avant"></span>
-        <span class="env-rabat"></span>
-        <span class="env-sceau">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#F10291" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-        </span>
-      </button>
-      <p class="tap">clique dessus ✨</p>
-    </div>
-
-    <!-- ✏️ TOUT CE TEXTE EST À REMPLACER PAR LE TIEN -->
-    <article class="lettre" id="lettre" hidden>
-      <p style="animation-delay:.05s">Je sais jamais trop comment dire ces trucs-là en vrai, alors je l'écris.</p>
-      <p style="animation-delay:.55s">Y'a un truc chez toi qui me fait sourire tout seul, même quand t'es pas là. Ta façon de rire, ta façon de raconter n'importe quoi pendant des heures.</p>
-      <p style="animation-delay:1.05s">Je voulais juste que tu saches que t'es quelqu'un de vraiment spécial pour moi. Voilà. C'est dit.</p>
-      <p class="signe" style="animation-delay:1.55s">— moi 💗</p>
-
-      <figure class="polaroid" style="animation-delay:2s">
-        <div class="cadre">
-          <!-- 🐱 chat n°2 : il offre un bouquet -->
-          <img src="cat1.jpg" alt="Un petit chat qui tend un bouquet de roses">
-        </div>
-        <figcaption>tiens, c'est pour toi ♡</figcaption>
-      </figure>
-    </article>
-  </section>
-
-  <!-- ══ 3. LA QUESTION ══════════════════════════════════════════════ -->
-  <section id="question">
-    <!-- 🐱 chat n°3 : il attend la réponse -->
-    <div class="sticker sticker-md">
-      <img src="cat2.jpg" alt="Un petit chat tout excité avec un cœur au-dessus de la tête">
-    </div>
-
-    <!-- ✏️ REMPLACE PAR TA VRAIE QUESTION -->
-    <h2>Alors… on se fait un date, toi et moi&nbsp;?</h2>
-
-    <div class="boutons">
-      <button class="btn oui" id="oui">Oui 💗</button>
-      <button class="btn non" id="non">Non</button>
-    </div>
-    <p class="taquine" id="taquine"></p>
-  </section>
-
-  <!-- ══ 4. LA RÉPONSE ═══════════════════════════════════════════════ -->
-  <section id="final">
-    <p class="gros">Yaaay&nbsp;!!</p>
-    <p class="sous" style="font-size:1.15rem;margin-top:20px">T'as dit oui 🥹 Du coup c'est officiel, on a un date.</p>
-
-    <!-- 📅 Le calendrier : il se génère tout seul à partir de la date du jour -->
-    <div class="agenda">
-      <h3>Tu serais libre quand&nbsp;?</h3>
-
-      <div class="cal">
-        <div class="cal-tete">
-          <button class="cal-nav" id="calPrec" type="button" aria-label="Mois précédent">‹</button>
-          <span id="calMois" aria-live="polite">—</span>
-          <button class="cal-nav" id="calSuiv" type="button" aria-label="Mois suivant">›</button>
-        </div>
-        <div class="cal-jours" aria-hidden="true">
-          <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
-        </div>
-        <div class="cal-grille" id="calGrille" role="group" aria-label="Choisis un jour"></div>
-      </div>
-
-      <p class="cal-reponse" id="calReponse">choisis le jour qui t'arrange ♡</p>
-      <button class="btn-doux" id="jsp" type="button">je sais pas encore 🤷</button>
-
-      <!-- 🐱 chat n°4 : il débarque une fois qu'elle a répondu -->
-      <div class="sticker sticker-sm" id="stickerOui" hidden>
-        <img src="cat3.jpg" alt="Un chat tout content qui crie Yipppeee">
-      </div>
-
-      <!-- ✏️ Le petit mot sur la distance -->
-      <p class="ps">et je sais que t'habites pas juste à côté… mais si c'est plus simple pour toi, je peux très bien faire le trajet et venir te voir 🚆</p>
-    </div>
-  </section>
-
+<div class="nuages" aria-hidden="true">
+  <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
+  <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
+  <svg class="nuage" viewBox="0 0 120 60"><g fill="#FFF3F2"><ellipse cx="38" cy="38" rx="30" ry="20"/><ellipse cx="66" cy="30" rx="24" ry="22"/><ellipse cx="88" cy="40" rx="22" ry="16"/></g></svg>
 </div>
 
-<footer>fait à la main, pour toi ♡</footer>
+<main class="page">
+  <span class="eyebrow">rien que pour toi</span>
+
+  <!-- 🐱 chat n°1 -->
+  <div class="sticker sticker-xl">
+    <img src="cat.jpg" alt="Un petit chat qui serre un gros cœur rose contre lui">
+  </div>
+
+  <!-- ✏️ REMPLACE « toi » par son prénom -->
+  <h1>Hey toi&nbsp;💗</h1>
+  <p class="sous">J'ai fait ce petit coin d'internet rien que pour toi. Prends ton temps, y'a rien qui presse.</p>
+
+  <a class="suite" href="lettre.html">Continuer&nbsp;→</a>
+
+  <div class="points" aria-label="Page 1 sur 3"><i class="on"></i><i></i><i></i></div>
+</main>
 
 <script>
 (function(){
   'use strict';
-  var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ── Cœurs qui montent en fond ─────────────────────────────────── */
-  (function coeursDeFond(){
-    if(doux) return;
-    var zone = document.getElementById('flotte');
-    var teintes = ['#FFCAE4','#FFF3F2','#F10291','#FF4FB0','#FFCAE4'];
-    var NS = 'http://www.w3.org/2000/svg';
-    for(var i=0;i<14;i++){
-      var t = Math.round(10 + Math.random()*20);
-      var s = document.createElementNS(NS,'svg');
-      s.setAttribute('viewBox','0 0 24 24');
-      s.setAttribute('width',t); s.setAttribute('height',t);
-      s.style.left = (Math.random()*100) + '%';
-      s.style.animationDuration = (13 + Math.random()*14) + 's';
-      s.style.animationDelay = (-Math.random()*20) + 's';
-      s.style.setProperty('--tour', (Math.random()*80-40) + 'deg');
-      var p = document.createElementNS(NS,'path');
-      p.setAttribute('d','M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-      p.setAttribute('fill', teintes[i % teintes.length]);
-      s.appendChild(p); zone.appendChild(s);
-    }
-  })();
-
-  /* ── L'enveloppe qui s'ouvre ───────────────────────────────────── */
-  var env = document.getElementById('env');
-  var envZone = document.getElementById('envZone');
-  var consigne = document.getElementById('consigne');
-  var lettre = document.getElementById('lettre');
-  var ouverte = false;
-
-  env.addEventListener('click', function(){
-    if(ouverte) return;
-    ouverte = true;
-    env.classList.add('ouverte');
-    env.setAttribute('aria-expanded','true');
-    setTimeout(function(){
-      env.classList.add('partie');
-      setTimeout(function(){
-        envZone.hidden = true;
-        consigne.hidden = true;
-        lettre.hidden = false;
-        lettre.scrollIntoView({behavior: doux ? 'auto' : 'smooth', block:'center'});
-      }, 380);
-    }, doux ? 80 : 950);
-  });
-
-  /* ── Le bouton « Non » qui s'échappe ───────────────────────────── */
-  var non = document.getElementById('non');
-  var oui = document.getElementById('oui');
-  var taquine = document.getElementById('taquine');
-  var fuites = 0;
-  var phrases = [
-    'attends, réfléchis bien 👀',
-    'hmm… t\'es sûre de toi ?',
-    'le bouton est pas d\'accord',
-    'il commence à fatiguer',
-    'allez quoi 🥺',
-    'tu vois bien qu\'il veut pas',
-    'dernière chance de dire oui',
-    'bon. le « non » a démissionné.'
-  ];
-
-  function echappe(){
-    if(!non.classList.contains('libre')){
-      var r = non.getBoundingClientRect();
-      non.style.left = r.left + 'px';
-      non.style.top = r.top + 'px';
-      non.classList.add('libre');
-    }
-    var marge = 14;
-    var l = non.offsetWidth, h = non.offsetHeight;
-    var maxX = Math.max(marge, window.innerWidth - l - marge);
-    var maxY = Math.max(marge, window.innerHeight - h - marge);
-    var ro = oui.getBoundingClientRect();
-    var x, y, essais = 0;
-    do{
-      x = marge + Math.random() * (maxX - marge);
-      y = marge + Math.random() * (maxY - marge);
-      essais++;
-    } while(essais < 40 && Math.hypot(x - ro.left, y - ro.top) < 170);
-    non.style.left = x + 'px';
-    non.style.top  = y + 'px';
-
-    fuites++;
-    taquine.textContent = phrases[Math.min(fuites - 1, phrases.length - 1)];
-    oui.style.transform = 'scale(' + Math.min(1 + fuites * 0.13, 2.1) + ')';
-    if(fuites >= 6) non.style.opacity = Math.max(.35, 1 - (fuites - 5) * 0.16);
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var zone = document.getElementById('flotte');
+  var teintes = ['#FFCAE4','#FFF3F2','#F10291','#FF4FB0','#FFCAE4'];
+  var NS = 'http://www.w3.org/2000/svg';
+  for(var i=0;i<14;i++){
+    var t = Math.round(10 + Math.random()*20);
+    var s = document.createElementNS(NS,'svg');
+    s.setAttribute('viewBox','0 0 24 24');
+    s.setAttribute('width',t); s.setAttribute('height',t);
+    s.style.left = (Math.random()*100) + '%';
+    s.style.animationDuration = (13 + Math.random()*14) + 's';
+    s.style.animationDelay = (-Math.random()*20) + 's';
+    s.style.setProperty('--tour', (Math.random()*80-40) + 'deg');
+    var p = document.createElementNS(NS,'path');
+    p.setAttribute('d','M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+    p.setAttribute('fill', teintes[i % teintes.length]);
+    s.appendChild(p); zone.appendChild(s);
   }
-
-  non.addEventListener('pointerenter', echappe);
-  non.addEventListener('pointerdown', function(e){ e.preventDefault(); echappe(); });
-  non.addEventListener('click', function(e){ e.preventDefault(); echappe(); });
-  window.addEventListener('resize', function(){ if(non.classList.contains('libre')) echappe(); });
-
-  /* ── Le « Oui » ────────────────────────────────────────────────── */
-  oui.addEventListener('click', function(){
-    document.getElementById('question').hidden = true;
-    non.hidden = true;
-    var final = document.getElementById('final');
-    final.classList.add('visible');
-    final.scrollIntoView({behavior: doux ? 'auto' : 'smooth', block:'center'});
-    if(!doux) pluieDeCoeurs();
-  });
-
-  /* ── Pluie de cœurs ────────────────────────────────────────────── */
-  function pluieDeCoeurs(){
-    var cv = document.getElementById('confettis');
-    var ctx = cv.getContext('2d');
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    function cadre(){
-      cv.width = window.innerWidth * dpr;
-      cv.height = window.innerHeight * dpr;
-      cv.style.width = window.innerWidth + 'px';
-      cv.style.height = window.innerHeight + 'px';
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-    }
-    cadre();
-    window.addEventListener('resize', cadre);
-
-    var teintes = ['#F10291','#FFCAE4','#FFF3F2','#FF4FB0','#89235B'];
-    var bouts = [];
-    for(var i=0;i<130;i++){
-      bouts.push({
-        x: Math.random() * window.innerWidth,
-        y: -20 - Math.random() * window.innerHeight,
-        t: 7 + Math.random() * 12,
-        vy: 1.4 + Math.random() * 2.6,
-        vx: -0.8 + Math.random() * 1.6,
-        a: Math.random() * Math.PI * 2,
-        va: -0.05 + Math.random() * 0.1,
-        c: teintes[Math.floor(Math.random() * teintes.length)]
-      });
-    }
-    var debut = performance.now();
-
-    function coeur(x, y, t, c, a){
-      ctx.save(); ctx.translate(x, y); ctx.rotate(a); ctx.scale(t/24, t/24);
-      ctx.fillStyle = c; ctx.beginPath();
-      ctx.moveTo(0, 9.35);
-      ctx.bezierCurveTo(-13, -1.3, -22, -7.6, -22, -15.5);
-      ctx.bezierCurveTo(-22, -21.6, -17.6, -26, -11.5, -26);
-      ctx.bezierCurveTo(-7.5, -26, -3.8, -23.9, 0, -20.3);
-      ctx.bezierCurveTo(3.8, -23.9, 7.5, -26, 11.5, -26);
-      ctx.bezierCurveTo(17.6, -26, 22, -21.6, 22, -15.5);
-      ctx.bezierCurveTo(22, -7.6, 13, -1.3, 0, 9.35);
-      ctx.closePath(); ctx.fill(); ctx.restore();
-    }
-
-    function boucle(now){
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      var fini = now - debut > 9000;
-      for(var i=0;i<bouts.length;i++){
-        var b = bouts[i];
-        b.y += b.vy;
-        b.x += b.vx + Math.sin((now/700) + i) * 0.5;
-        b.a += b.va;
-        if(b.y > window.innerHeight + 30 && !fini){
-          b.y = -30; b.x = Math.random() * window.innerWidth;
-        }
-        coeur(b.x, b.y, b.t, b.c, b.a);
-      }
-      if(now - debut < 12000) requestAnimationFrame(boucle);
-      else ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    }
-    requestAnimationFrame(boucle);
-  }
-
-  /* ── Le calendrier ─────────────────────────────────────────────── */
-  (function calendrier(){
-    var MOIS = ['janvier','février','mars','avril','mai','juin',
-                'juillet','août','septembre','octobre','novembre','décembre'];
-    var SEM  = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
-
-    var grille  = document.getElementById('calGrille');
-    var titre   = document.getElementById('calMois');
-    var prec    = document.getElementById('calPrec');
-    var suiv    = document.getElementById('calSuiv');
-    var reponse = document.getElementById('calReponse');
-    var jsp     = document.getElementById('jsp');
-    var chat    = document.getElementById('stickerOui');
-
-    // le 4e chat débarque dès qu'elle a répondu (date choisie ou « je sais pas »)
-    function montreChat(){
-      chat.hidden = false;
-      chat.style.animation = 'none';
-      void chat.offsetWidth;      // on relance l'animation à chaque réponse
-      chat.style.animation = '';
-    }
-
-    var auj = new Date(); auj.setHours(0,0,0,0);
-    var debut = new Date(auj.getFullYear(), auj.getMonth(), 1);     // pas avant ce mois
-    var fin   = new Date(auj.getFullYear(), auj.getMonth() + 4, 1); // ni au-delà de 4 mois
-    var vue   = new Date(debut.getTime());
-    var choisi = null;
-
-    function dessine(){
-      titre.textContent = MOIS[vue.getMonth()] + ' ' + vue.getFullYear();
-      prec.disabled = vue.getTime() <= debut.getTime();
-      suiv.disabled = new Date(vue.getFullYear(), vue.getMonth() + 1, 1).getTime() >= fin.getTime();
-
-      grille.textContent = '';
-
-      // cases vides avant le 1er (la semaine commence le lundi)
-      var decalage = (new Date(vue.getFullYear(), vue.getMonth(), 1).getDay() + 6) % 7;
-      for(var v = 0; v < decalage; v++){
-        var trou = document.createElement('span');
-        trou.className = 'jour vide';
-        grille.appendChild(trou);
-      }
-
-      var nbJours = new Date(vue.getFullYear(), vue.getMonth() + 1, 0).getDate();
-      for(var d = 1; d <= nbJours; d++){
-        (function(d){
-          var date = new Date(vue.getFullYear(), vue.getMonth(), d);
-          var jourSem = (date.getDay() + 6) % 7;
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'jour';
-          b.textContent = d;
-          b.setAttribute('aria-label', SEM[jourSem] + ' ' + d + ' ' + MOIS[vue.getMonth()]);
-
-          if(jourSem >= 5) b.classList.add('weekend');
-          if(date.getTime() === auj.getTime()) b.classList.add('aujourdhui');
-          if(date.getTime() < auj.getTime()) b.disabled = true;
-          if(choisi && date.getTime() === choisi.getTime()){
-            b.classList.add('choisi');
-            b.setAttribute('aria-pressed','true');
-          }
-
-          b.addEventListener('click', function(){
-            choisi = date;
-            dessine();
-            reponse.textContent = 'Le ' + SEM[jourSem] + ' ' + d + ' ' + MOIS[date.getMonth()] + ', ça me va trop bien ✨';
-            montreChat();
-          });
-
-          grille.appendChild(b);
-        })(d);
-      }
-    }
-
-    prec.addEventListener('click', function(){
-      vue = new Date(vue.getFullYear(), vue.getMonth() - 1, 1);
-      dessine();
-    });
-    suiv.addEventListener('click', function(){
-      vue = new Date(vue.getFullYear(), vue.getMonth() + 1, 1);
-      dessine();
-    });
-
-    jsp.addEventListener('click', function(){
-      choisi = null;
-      dessine();
-      reponse.textContent = 'T\'inquiète, y\'a zéro pression 🤍 dis-moi quand tu sais, j\'attendrai.';
-      montreChat();
-    });
-
-    dessine();
-  })();
 })();
 </script>
+</body>
+</html>
